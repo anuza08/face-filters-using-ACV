@@ -113,14 +113,13 @@ def capture_photo(filter_type):
     if not ret:
         return "Failed to capture image", 500
 
-    # Apply the selected filter to the frame
     frame_with_filter = apply_filter(frame, filter_type)
 
-    # Get the current timestamp for the image file name
+ 
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
     image_path = os.path.join(CAPTURE_DIR, f"photo_{timestamp}.png")
 
-    # Save the captured frame (with filter applied) as an image
+   
     cv2.imwrite(image_path, frame_with_filter)
 
     return f"Photo saved as {image_path}"
