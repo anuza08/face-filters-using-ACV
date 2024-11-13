@@ -3,13 +3,13 @@ import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.widgets import Button
 
-# Function to resize the filter image while maintaining its aspect ratio
+
 def resize_aspect_ratio(image, target_width, target_height):
-    # Get the aspect ratio of the filter image
+  
     h, w = image.shape[:2]
     aspect_ratio = w / h
 
-    # Calculate the new width and height while maintaining aspect ratio
+    
     if target_width / target_height > aspect_ratio:
         new_width = int(target_height * aspect_ratio)
         new_height = target_height
@@ -17,17 +17,18 @@ def resize_aspect_ratio(image, target_width, target_height):
         new_height = int(target_width / aspect_ratio)
         new_width = target_width
 
-    # Resize the image
+   
     resized_image = cv2.resize(image, (new_width, new_height))
     return resized_image
 
-# Load Haar cascades for face and eye detection
+
 eye_detector = cv2.CascadeClassifier('E:/Face-Filters/haarcascade_eye_tree_eyeglasses.xml')
 face_detector = cv2.CascadeClassifier('E:/Face-Filters/haarcascade_frontalface_default.xml')
 
 # Load filter images (with the possibility of not having an alpha channel)
 mask = cv2.imread('E:/Face-Filters/mask.png', cv2.IMREAD_UNCHANGED)
 dog_filter = cv2.imread('E:/Face-Filters/flower.png', cv2.IMREAD_UNCHANGED)
+orange_heart_filter = cv2.imread('E:/Face-Filters/orange-heart.png', cv2.IMREAD_UNCHANGED)
 
 # Ensure the images have 4 channels (RGBA)
 def add_alpha_channel(image):
@@ -40,11 +41,12 @@ def add_alpha_channel(image):
 # Ensure filters have alpha channels
 mask = add_alpha_channel(mask)
 dog_filter = add_alpha_channel(dog_filter)
+orange_heart_filter = add_alpha_channel(orange_heart_filter)
 
 # Start video capture
 cap = cv2.VideoCapture(0)
 
-# Variables for active filter (0 for mask, 1 for dog filter)
+# Variables for active filter (0 for mask, 1 for dog filter, 2 for orange heart filter)
 active_filter = 0
 
 # Function to switch the active filter to mask filter
@@ -57,19 +59,28 @@ def set_dog_filter(event):
     global active_filter
     active_filter = 1
 
+# Function to switch the active filter to orange heart filter
+def set_orange_heart_filter(event):
+    global active_filter
+    active_filter = 2
+
 # Create a figure for displaying the video feed
 fig, ax = plt.subplots()
 plt.subplots_adjust(bottom=0.2)  # Adjust the space for buttons
 
 # Add buttons for filter switching
-ax_mask = plt.axes([0.1, 0.05, 0.35, 0.075])  # Position for Mask button
-ax_dog = plt.axes([0.1, 0.15, 0.15, 0.175])  # Position for Dog button
+ax_mask = plt.axes([0.1, 0.05, 0.25, 0.075])  # Position for Mask button
+ax_dog = plt.axes([0.4, 0.05, 0.25, 0.075])  # Position for Dog button
+ax_orange_heart = plt.axes([0.7, 0.05, 0.25, 0.075])  # Position for Orange Heart button
 
 button_mask = Button(ax_mask, 'Mask Filter')
 button_mask.on_clicked(set_mask_filter)
 
 button_dog = Button(ax_dog, 'Dog Filter')
 button_dog.on_clicked(set_dog_filter)
+
+button_orange_heart = Button(ax_orange_heart, 'Orange Heart Filter')
+button_orange_heart.on_clicked(set_orange_heart_filter)
 
 while cap.isOpened():
     _, feed = cap.read()
@@ -108,6 +119,10 @@ while cap.isOpened():
             # Resize and apply the dog filter with aspect ratio preservation
             dog_filter_resized = resize_aspect_ratio(dog_filter, filter_width, filter_height)
             temp = dog_filter_resized
+        elif active_filter == 2:
+            # Resize and apply the orange heart filter with aspect ratio preservation
+            orange_heart_filter_resized = resize_aspect_ratio(orange_heart_filter, filter_width, filter_height)
+            temp = orange_heart_filter_resized
 
         # Ensure the filter image doesn't go beyond the feed dimensions
         temp_height, temp_width = temp.shape[:2]
